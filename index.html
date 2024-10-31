@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- from chatgpt -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Font Text Editor</title>
+    <style>
+        /* Step 2: Define the custom font */
+        @font-face {
+            font-family: 'CustomFont';
+            src: url('fonts/OpenDyslexicMono-Regular.woff2') format('woff2'),
+                 url('fonts/OpenDyslexicMono-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* Apply the font globally or just to the text area */
+        body {
+            font-family: 'CustomFont', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #textArea {
+            width: 100%;
+            height: 200px;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: 'CustomFont', sans-serif;
+            resize: both;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #f0f0f0;
+        }
+        .dark-mode #textArea {
+            background-color: #333;
+            color: #f0f0f0;
+            border-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Custom Font Text Editor</h1>
+        <textarea id="textArea" placeholder="Type here..."></textarea>
+        <div class="btn-group">
+            <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+            <button onclick="changeFontSize(2)">Increase Font Size</button>
+            <button onclick="changeFontSize(-2)">Decrease Font Size</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        function changeFontSize(amount) {
+            const textArea = document.getElementById("textArea");
+            let currentSize = parseInt(window.getComputedStyle(textArea).fontSize);
+            textArea.style.fontSize = (currentSize + amount) + "px";
+        }
+    </script>
+</body>
+</html>
