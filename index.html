@@ -47,11 +47,33 @@
             color: #f0f0f0;
             border-color: #555;
         }
+
+        /* Third mode styles (e.g., sepia) */
+        .third-mode {
+            background-color: #f5e6c8;
+            color: #3e3e3e;
+        }
+        .third-mode #textArea {
+            background-color: #f4d6aa;
+            color: #3e3e3e;
+            border-color: #b08d57;
+        }
+
+        /* Third mode styles (e.g., sepia) */
+        .forth-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        .forth-mode #textArea {
+            background-color: #000000;
+            color: #ffffff;
+            border-color: #555;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Custom Font Text Editor</h1>
+        <h1 onclick="hideTitle()">OpenDyslexic Text Editor</h1>
         <textarea id="textArea" placeholder="Type here..."></textarea>
         <div class="btn-group">
             <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
@@ -61,14 +83,32 @@
     </div>
 
     <script>
+         // Array of mode classes
+        const modes = ["light-mode", "dark-mode", "forth-mode", "third-mode"];
+        let modeIndex = 0; // Track the current mode index
         function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
+            const body = document.body;
+            // Update the mode index to the next mode
+             // Remove all mode classes
+            for (const mode of modes) {
+                body.classList.remove(mode);
+            }
+
+            modeIndex = (modeIndex + 1) % modes.length;
+            //document.body.classList.toggle(modes[modeIndex]);
+            body.classList.add(modes[modeIndex]);
         }
 
         function changeFontSize(amount) {
             const textArea = document.getElementById("textArea");
             let currentSize = parseInt(window.getComputedStyle(textArea).fontSize);
             textArea.style.fontSize = (currentSize + amount) + "px";
+        }
+
+        // Function to hide the title
+        function hideTitle() {
+            const title = document.querySelector("h1");
+            title.style.display = "none";
         }
     </script>
 </body>
