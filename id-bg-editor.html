@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID Photo Background Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #outputCanvas {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+        #downloadLink {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ID Photo Background Editor</h1>
+    <input type="file" id="imageUpload" accept="image/*">
+    <canvas id="outputCanvas"></canvas>
+    <br/>
+    <a id="downloadLink" download="photo.png">Download Result</a>
+
+    <script>
+        const input = document.getElementById('imageUpload');
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        const downloadLink = document.getElementById('downloadLink');
+
+        input.addEventListener('change', handleUpload);
+
+        function handleUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    replaceBackground();
+                    downloadLink.href = canvas.toDataURL();
+                    downloadLink.style.display = 'inline';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function replaceBackground() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+
+            const idx = (x, y) => (y * width + x) * 4;
+
+            // Average the top row to get the background color
+            let r = 0, g = 0, b = 0;
+            for (let x = 0; x < width; x++) {
+                const i = idx(x, 0);
+                r += data[i];
+                g += data[i + 1];
+                b += data[i + 2];
+            }
+            r /= width;
+            g /= width;
+            b /= width;
+
+            const tolerance = 40;
+
+            const visited = new Uint8Array(width * height);
+            const queue = [];
+
+            for (let x = 0; x < width; x++) {
+                queue.push([x, 0]);
+                visited[x] = 1;
+            }
+
+            const similar = (i) => {
+                const dr = data[i] - r;
+                const dg = data[i + 1] - g;
+                const db = data[i + 2] - b;
+                return Math.sqrt(dr * dr + dg * dg + db * db) < tolerance;
+            };
+
+            while (queue.length) {
+                const [x, y] = queue.shift();
+                const i = idx(x, y);
+
+                if (!similar(i)) continue;
+
+                data[i] = 255;
+                data[i + 1] = 255;
+                data[i + 2] = 255;
+
+                const neighbors = [
+                    [x - 1, y],
+                    [x + 1, y],
+                    [x, y - 1],
+                    [x, y + 1]
+                ];
+                for (const [nx, ny] of neighbors) {
+                    if (
+                        nx >= 0 && nx < width &&
+                        ny >= 0 && ny < height &&
+                        !visited[ny * width + nx]
+                    ) {
+                        visited[ny * width + nx] = 1;
+                        queue.push([nx, ny]);
+                    }
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+    </script>
+</body>
+</html>
