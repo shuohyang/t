@@ -1,0 +1,369 @@
+<!--
+## This is generated from Claude ai
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life in Weeks</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <style>
+        .week-cell {
+            width: 8px;
+            height: 8px;
+            margin: 2px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .week-past { background-color: #374151; }
+        .week-current { 
+            background-color: #3b82f6; 
+            animation: pulse 2s infinite;
+        }
+        .week-future { background-color: #e5e7eb; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+        }
+        
+        .container {
+            max-width: 448px;
+            margin: 0 auto;
+            padding: 24px;
+            padding-top: 64px;
+        }
+        
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            color: #374151;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #374151;
+        }
+        
+        .stat-text {
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+        
+        .stat-number {
+            color: #111827;
+            font-weight: 500;
+        }
+        
+        .week-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .week-row {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .legend {
+            display: flex;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+        }
+        
+        .hover-info {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #6b7280;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-size: 24px; color: #374151; margin-bottom: 8px;">Life in weeks</h1>
+        <p style="color: #6b7280; margin-bottom: 32px;">A simple visualization to reflect on the passage of time</p>
+        
+        <div class="card">
+            <h2 class="section-title">Your life in weeks</h2>
+            <div class="week-grid" id="weekGrid"></div>
+            
+            <div class="hover-info" id="hoverInfo"></div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #374151;"></div>
+                    <span style="color: #6b7280;">Past</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #3b82f6;"></div>
+                    <span style="color: #6b7280;">Present</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #e5e7eb;"></div>
+                    <span style="color: #6b7280;">Future</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="statsContainer" style="display: none;"></div>
+        
+        <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
+            <div class="card">
+                <h3 class="section-title">Enter a birthdate</h3>
+                <input type="date" class="input-field" id="birthdate">
+            </div>
+            
+            <div class="card">
+                <h3 class="section-title">Expected Age (years)</h3>
+                <div style="position: relative;">
+                    <input type="number" class="input-field" id="expectedAge" value="80" min="1" max="120" list="age-options">
+                    <datalist id="age-options">
+                        <option value="65"></option>
+                        <option value="70"></option>
+                        <option value="75"></option>
+                        <option value="80"></option>
+                        <option value="85"></option>
+                        <option value="90"></option>
+                        <option value="95"></option>
+                        <option value="100"></option>
+                    </datalist>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let birthdate = '';
+        let expectedAge = 80;
+        let stats = null;
+        
+        function formatNumber(num) {
+            return new Intl.NumberFormat().format(num);
+        }
+        
+        function calculateStats(date, expectedAgeYears) {
+            if (!date) return null;
+            
+            const birthDate = new Date(date);
+            const today = new Date();
+            const birthYear = birthDate.getFullYear();
+            
+            // Calculate weeks lived
+            const msInWeek = 1000 * 60 * 60 * 24 * 7;
+            const weeksLived = Math.floor((today - birthDate) / msInWeek);
+            
+            // Calculate total weeks based on expected age
+            const totalWeeks = expectedAgeYears * 52;
+            const weeksRemaining = totalWeeks - weeksLived;
+            const percentageLived = Math.round((weeksLived / totalWeeks) * 100);
+            
+            // Calculate days lived
+            const msInDay = 1000 * 60 * 60 * 24;
+            const daysLived = Math.floor((today - birthDate) / msInDay);
+            
+            // Calculate hours slept (assuming 8 hours per day)
+            const hoursSlept = Math.floor(daysLived * 8);
+            
+            // Calculate heartbeats (average 70 bpm)
+            const heartbeats = Math.floor(daysLived * 24 * 60 * 70);
+            
+            // Calculate breaths (average 16 breaths per minute)
+            const breaths = Math.floor(daysLived * 24 * 60 * 16);
+
+            // Calculate seasons experienced
+            const seasons = Math.floor(daysLived / 91.25);
+            
+            return {
+                weeksLived,
+                totalWeeks,
+                weeksRemaining,
+                percentageLived,
+                daysLived,
+                hoursSlept,
+                heartbeats,
+                breaths,
+                seasons,
+                birthYear
+            };
+        }
+        
+        function getPopulationAtYear(year) {
+            const populationData = {
+                1950: 2.5,
+                1960: 3.0,
+                1970: 3.7,
+                1980: 4.4,
+                1990: 5.3,
+                2000: 6.1,
+                2010: 6.9,
+                2020: 7.8,
+                2025: 8.1
+            };
+            
+            const years = Object.keys(populationData).map(Number);
+            const closestYear = years.reduce((prev, curr) => 
+                Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+            );
+            
+            return Math.round(populationData[closestYear] * 1000000000);
+        }
+        
+        function renderWeekGrid() {
+            const currentStats = birthdate && stats ? stats : { weeksLived: 0, totalWeeks: expectedAge * 52 };
+            const weekGrid = document.getElementById('weekGrid');
+            weekGrid.innerHTML = '';
+            
+            const weeksPerRow = 52;
+            const totalRows = Math.ceil(currentStats.totalWeeks / weeksPerRow);
+            
+            for (let row = 0; row < totalRows; row++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'week-row';
+                
+                for (let col = 0; col < weeksPerRow; col++) {
+                    const weekNumber = row * weeksPerRow + col;
+                    if (weekNumber < currentStats.totalWeeks) {
+                        const isPast = weekNumber < currentStats.weeksLived;
+                        const isCurrent = weekNumber === currentStats.weeksLived;
+                        
+                        const weekCell = document.createElement('div');
+                        weekCell.className = 'week-cell';
+                        
+                        if (isPast) {
+                            weekCell.classList.add('week-past');
+                        } else if (isCurrent) {
+                            weekCell.classList.add('week-current');
+                        } else {
+                            weekCell.classList.add('week-future');
+                        }
+                        
+                        weekCell.addEventListener('mouseenter', () => {
+                            const hoverInfo = document.getElementById('hoverInfo');
+                            let hoverText = `Week ${weekNumber + 1}: `;
+                            if (weekNumber < currentStats.weeksLived) {
+                                hoverText += 'A week from your past';
+                            } else if (weekNumber === currentStats.weeksLived) {
+                                hoverText += 'Your current week';
+                            } else {
+                                hoverText += 'A week in your potential future';
+                            }
+                            hoverInfo.textContent = hoverText;
+                        });
+                        
+                        weekCell.addEventListener('mouseleave', () => {
+                            document.getElementById('hoverInfo').textContent = '';
+                        });
+                        
+                        rowDiv.appendChild(weekCell);
+                    }
+                }
+                
+                weekGrid.appendChild(rowDiv);
+            }
+        }
+        
+        function renderStats() {
+            if (!stats) {
+                document.getElementById('statsContainer').style.display = 'none';
+                return;
+            }
+            
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.style.display = 'block';
+            
+            const birthsPerDay = 385000;
+            const deathsPerDay = 166000;
+            
+            statsContainer.innerHTML = `
+                <div class="card">
+                    <h2 class="section-title">Life highlights</h2>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <p class="stat-text">You've lived <span class="stat-number">${formatNumber(stats.weeksLived)}</span> weeks, which is <span class="stat-number">${stats.percentageLived}%</span> of a full life.</p>
+                        <p class="stat-text">That's <span class="stat-number">${formatNumber(stats.daysLived)}</span> days of experience and approximately <span class="stat-number">${formatNumber(stats.seasons)}</span> seasons observed.</p>
+                        <p class="stat-text">Your heart has beaten approximately <span class="stat-number">${formatNumber(stats.heartbeats)}</span> times.</p>
+                        <p class="stat-text">You've taken around <span class="stat-number">${formatNumber(stats.breaths)}</span> breaths and slept about <span class="stat-number">${formatNumber(stats.hoursSlept)}</span> hours.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Societal context</h2>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <p class="stat-text">During your lifetime, humanity's population has grown from ${stats.birthYear ? `<span class="stat-number">${formatNumber(getPopulationAtYear(stats.birthYear))}</span>` : ""} to over <span class="stat-number">8</span> billion people.</p>
+                        <p class="stat-text">The average person will meet around <span class="stat-number">80,000</span> people in their lifetime. You've likely already met approximately <span class="stat-number">${formatNumber(Math.round(80000 * (stats.percentageLived/100)))}</span> individuals.</p>
+                        <p class="stat-text">Since your birth, humanity has collectively experienced approximately <span class="stat-number">${formatNumber(Math.round(stats.daysLived * birthsPerDay))}</span> births and <span class="stat-number">${formatNumber(Math.round(stats.daysLived * deathsPerDay))}</span> deaths.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Cosmic perspective</h2>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <p class="stat-text">Since your birth, Earth has traveled approximately <span class="stat-number">${formatNumber(Math.round(stats.daysLived * 1.6 * 1000000))}</span> kilometers through space around the Sun.</p>
+                        <p class="stat-text">The observable universe is about <span class="stat-number">93</span> billion light-years across, meaning light takes <span class="stat-number">93</span> billion years to cross it. Your entire lifespan is just <span class="stat-number">${(80/13800000000 * 100).toFixed(10)}%</span> of the universe's age.</p>
+                        <p class="stat-text">During your lifetime, our solar system has moved about <span class="stat-number">${formatNumber(Math.round(stats.daysLived * 24 * 828000))}</span> kilometers through the Milky Way galaxy.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">Natural world</h2>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <p class="stat-text">You've experienced approximately <span class="stat-number">${formatNumber(Math.round(stats.daysLived / 29.53))}</span> lunar cycles and <span class="stat-number">${formatNumber(Math.floor(stats.daysLived / 365.25))}</span> trips around the Sun.</p>
+                        <p class="stat-text">A giant sequoia tree can live over 3,000 years. Your current age is <span class="stat-number">${((stats.daysLived / 365.25) / 3000 * 100).toFixed(2)}%</span> of its potential lifespan.</p>
+                        <p class="stat-text">During your lifetime, your body has replaced most of its cells several times. You are not made of the same atoms you were born with.</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateVisualization() {
+            stats = calculateStats(birthdate, expectedAge);
+            renderWeekGrid();
+            renderStats();
+        }
+        
+        // Event listeners
+        document.getElementById('birthdate').addEventListener('change', function(e) {
+            birthdate = e.target.value;
+            updateVisualization();
+        });
+        
+        document.getElementById('expectedAge').addEventListener('input', function(e) {
+            expectedAge = parseInt(e.target.value) || 80;
+            updateVisualization();
+        });
+        
+        // Initial render
+        updateVisualization();
+    </script>
+</body>
+</html>
